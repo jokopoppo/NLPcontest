@@ -43,7 +43,7 @@ def LSTM_train(data, word_vec, ):
 
     # ----------------------- Train neural network-----------------------
     model.load_weights('contest_model.h5')
-    history = model.fit(word_vectors, to_categorical(labels), epochs=10, batch_size=50, validation_split=0.2)
+    history = model.fit(word_vectors, to_categorical(labels), epochs=5, batch_size=50, validation_split=0.2)
     model.save('contest_model.h5')
     # -------------------------- Evaluation-----------------------------
     length = int(word_vectors.__len__()*20/100)
@@ -53,6 +53,7 @@ def LSTM_train(data, word_vec, ):
     print('Confusion Matrix')
     print(cm)
 
-    plt.plot(history.history['acc'])
-    plt.plot(history.history['val_acc'])
+    plt.plot(history.history['acc'], label = 'acc')
+    plt.plot(history.history['val_acc'], label = 'val_acc')
+    plt.legend(loc='upper right')
     plt.show()
