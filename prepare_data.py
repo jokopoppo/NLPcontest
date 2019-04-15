@@ -40,3 +40,5 @@ def find_duplicate():
             miss.append(n)
         n += 1
     print(miss)
+
+find_duplicate()
