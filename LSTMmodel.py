@@ -17,15 +17,15 @@ def LSTM_train(data, word_vec):
     words = [d[1] for d in data]
 
     # ------------------- Extract word vectors -------------------------
-    word_vectors = init_word_vectors(words, word_vec)
+    word_vectors = init_word_vectors(words, word_vec, 100)
     print(word_vectors.shape)
     print(word_vectors[0])
     # --------------- Create recurrent neural network-----------------
-    model = init_model()
+    model = init_model(100)
     # ----------------------- Train neural network-----------------------
-    model.load_weights('contest_model.h5')
+    model.load_weights('contest_model_100.h5')
     history = model.fit(word_vectors, to_categorical(labels), epochs=5, batch_size=50, validation_split=0.2)
-    # model.save('contest_model.h5')
+    model.save('contest_model_100.h5')
     # -------------------------- Evaluation-----------------------------
     length = int(word_vectors.__len__() * 20 / 100)
     y_pred = model.predict(word_vectors[length:, :, :])
@@ -40,8 +40,9 @@ def LSTM_train(data, word_vec):
     plt.show()
 
 
-def init_model():
-    inputLayer = Input(shape=(60, 300))
+def init_model(max_length=60):
+    print("LEN", max_length)
+    inputLayer = Input(shape=(max_length, 300))
     lstm = LSTM(10, activation='relu')(inputLayer)
     lstm = Dropout(0.5)(lstm)
     outputLayer = Dense(3, activation='softmax')(lstm)
@@ -54,8 +55,7 @@ def init_model():
     return model
 
 
-def init_word_vectors(words, word_vec):
-    max_length = 60
+def init_word_vectors(words, word_vec, max_length=60):
     zero_vec = np.zeros(300)
     word_vectors = np.zeros((len(words), max_length, 300))
 
@@ -68,17 +68,17 @@ def init_word_vectors(words, word_vec):
     return word_vectors
 
 
-def predict_data(data_train, word_vec_file):
+def predict_data(data_train, word_vec_file, model_name, max_length=60):
     shuffle(data_train)
     for d in data_train:
         print(d)
 
     labels = [int(d[0]) for d in data_train]
     words = [d[1] for d in data_train]
-    word_vectors = init_word_vectors(words, word_vec_file)
+    word_vectors = init_word_vectors(words, word_vec_file, max_length)
 
-    model = init_model()
-    model.load_weights('contest_model.h5')
+    model = init_model(max_length)
+    model.load_weights(model_name)
     y_pred = model.predict(word_vectors)
 
     cm = confusion_matrix(labels, y_pred.argmax(axis=1))
