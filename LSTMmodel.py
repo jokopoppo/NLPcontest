@@ -5,7 +5,7 @@ from keras.utils import to_categorical
 import matplotlib.pyplot as plt
 from random import shuffle
 from sklearn.metrics import confusion_matrix
-
+import deepcut
 
 def LSTM_train(data, word_vec):
     # ------------------------- Read data ------------------------------
@@ -68,19 +68,25 @@ def init_word_vectors(words, word_vec, max_length=60):
     return word_vectors
 
 
-def predict_data(data_train, word_vec_file, model_name, max_length=60):
-    shuffle(data_train)
-    for d in data_train:
-        print(d)
+def predict_data(input_data, word_vec_file, model_name, max_length=60):
+    data = []
+    for d in input_data:
+        data.append(d.split("::")[1])
+        print(data[-1])
 
-    labels = [int(d[0]) for d in data_train]
-    words = [d[1] for d in data_train]
+    words = [deepcut.tokenize(d) for d in data]
     word_vectors = init_word_vectors(words, word_vec_file, max_length)
 
     model = init_model(max_length)
     model.load_weights(model_name)
     y_pred = model.predict(word_vectors)
 
-    cm = confusion_matrix(labels, y_pred.argmax(axis=1))
-    print('Confusion Matrix')
-    print(cm)
+    output = y_pred.argmax(axis=1)
+    out_label = ['H', 'P', 'M']
+    with open('predict_ans.txt','w',encoding='utf-8-sig') as outfile:
+        for i in range(output.__len__()):
+            outfile.write(str(i)+'::'+str(out_label[output[i]])+'\n')
+
+    # cm = confusion_matrix(labels, y_pred.argmax(axis=1))
+    # print('Confusion Matrix')
+    # print(cm)
